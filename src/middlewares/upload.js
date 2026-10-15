@@ -8,6 +8,7 @@ const folderMap = {
     courtImages: "courts",
     fawryReceipt: "bookings",
     personalIdImage: "users",
+    instaPayReceipt: "tournament-requests",
 };
 
 const storage = new CloudinaryStorage({
@@ -16,11 +17,12 @@ const storage = new CloudinaryStorage({
         const folder = folderMap[file.fieldname] || "others"
 
         return {
-        folder,
-        public_id: `${folder}-${uuidv4()}`,
-        resource_type: "image",
-        transformation: [{ width: 800, height: 800, crop: "limit" },{ quality: "auto" }]
-    }}
+            folder,
+            public_id: `${folder}-${uuidv4()}`,
+            resource_type: "image",
+            transformation: [{ width: 800, height: 800, crop: "limit" }, { quality: "auto" }]
+        }
+    }
 })
 
 const fileFilter = (req, file, cb) => {
