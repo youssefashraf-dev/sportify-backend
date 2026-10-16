@@ -1,11 +1,44 @@
 const tournamentModel = require('../../DB/models/tournamentModel')
 const asyncHandler = require('express-async-handler')
 const apiFeatures = require('../utils/apiFeatures')
+const cloudinary = require('../config/cloudinary')
+const streamifier = require('streamifier')
+
+const uploadToCloudinary = (buffer) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                folder: 'tournaments',
+                resource_type: 'image',
+                transformation: [
+                    { width: 800, height: 800, crop: 'limit' },
+                    { quality: 'auto' }
+                ]
+            },
+            (error, result) => {
+                if (error) {
+                    reject(error)
+                } else {
+                    resolve(result)
+                }
+            }
+        )
+
+        streamifier.createReadStream(buffer).pipe(stream)
+    })
+}
 
 const createTournament = asyncHandler(async (req, res) => {
+    let image = ''
+
+    if (req.file?.buffer) {
+        const result = await uploadToCloudinary(req.file.buffer)
+        image = result.secure_url
+    }
+
     const tournamentData = {
         ...req.body,
-        image: req.file?.path || ''
+        image
     }
 
     const tournament = await tournamentModel.create(tournamentData)
@@ -21,6 +54,7 @@ const createTournament = asyncHandler(async (req, res) => {
             message: 'Tournament creation failed'
         })
 })
+
 const getAllTournaments = asyncHandler(async (req, res) => {
     const mongooseQuery = tournamentModel.find()
 
@@ -64,8 +98,9 @@ const updateTournamentById = asyncHandler(async (req, res) => {
         ...req.body,
     }
 
-    if (req.file?.path) {
-        updateData.image = req.file.path
+    if (req.file?.buffer) {
+        const result = await uploadToCloudinary(req.file.buffer)
+        updateData.image = result.secure_url
     }
 
     const tournament = await tournamentModel.findByIdAndUpdate(
@@ -85,6 +120,7 @@ const updateTournamentById = asyncHandler(async (req, res) => {
             message: 'Tournament not found'
         })
 })
+
 const deleteTournamentById = asyncHandler(async (req, res) => {
     const { id } = req.params
 
