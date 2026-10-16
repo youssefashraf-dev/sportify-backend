@@ -1,3 +1,4 @@
+
 const router = require('express').Router()
 
 const {
@@ -25,6 +26,7 @@ const {
 
 const { verifyToken, allowedTo } = require('../middlewares/verifyToken')
 const { upload } = require('../middlewares/upload')
+const processImages = require('../middlewares/imageProcessor')
 
 
 // ==================== Tournaments ====================
@@ -35,6 +37,12 @@ router.route('/')
     .post(
         verifyToken,
         allowedTo('admin'),
+        upload.fields([
+            { name: 'tournamentImage', maxCount: 1 }
+        ]),
+        processImages([
+            { name: 'tournamentImage', multiple: false }
+        ]),
         createTournamentValidator,
         createTournament
     )
@@ -93,6 +101,12 @@ router.route('/:id')
         verifyToken,
         allowedTo('admin'),
         tournamentIdValidator,
+        upload.fields([
+            { name: 'tournamentImage', maxCount: 1 }
+        ]),
+        processImages([
+            { name: 'tournamentImage', multiple: false }
+        ]),
         updateTournamentValidator,
         updateTournamentById
     )

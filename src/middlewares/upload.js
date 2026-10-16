@@ -9,6 +9,7 @@ const folderMap = {
     fawryReceipt: "bookings",
     personalIdImage: "users",
     instaPayReceipt: "tournament-requests",
+    tournamentImage: "tournaments",
 };
 
 const storage = new CloudinaryStorage({

@@ -3,7 +3,12 @@ const asyncHandler = require('express-async-handler')
 const apiFeatures = require('../utils/apiFeatures')
 
 const createTournament = asyncHandler(async (req, res) => {
-    const tournament = await tournamentModel.create(req.body)
+    const tournamentData = {
+        ...req.body,
+        image: req.file?.path || ''
+    }
+
+    const tournament = await tournamentModel.create(tournamentData)
 
     tournament
         ? res.status(201).json({
@@ -16,7 +21,6 @@ const createTournament = asyncHandler(async (req, res) => {
             message: 'Tournament creation failed'
         })
 })
-
 const getAllTournaments = asyncHandler(async (req, res) => {
     const mongooseQuery = tournamentModel.find()
 
@@ -56,9 +60,17 @@ const getTournamentById = asyncHandler(async (req, res) => {
 const updateTournamentById = asyncHandler(async (req, res) => {
     const { id } = req.params
 
+    const updateData = {
+        ...req.body,
+    }
+
+    if (req.file?.path) {
+        updateData.image = req.file.path
+    }
+
     const tournament = await tournamentModel.findByIdAndUpdate(
         id,
-        req.body,
+        updateData,
         { new: true, runValidators: true }
     )
 
@@ -73,7 +85,6 @@ const updateTournamentById = asyncHandler(async (req, res) => {
             message: 'Tournament not found'
         })
 })
-
 const deleteTournamentById = asyncHandler(async (req, res) => {
     const { id } = req.params
 
