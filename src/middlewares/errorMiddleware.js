@@ -1,3 +1,4 @@
+const util = require('util')
 const logger = require('../utils/logger')
 
 
@@ -8,7 +9,10 @@ const globalError = (err,req,res,next)=>{
         name: err?.name,
         statusCode: err?.statusCode,
         path: req?.originalUrl,
-        method: req?.method
+        method: req?.method,
+        errorType: typeof err,
+        errorString: (() => { try { return String(err) } catch (e) { return '[String(err) failed]' } })(),
+        errorInspect: (() => { try { return util.inspect(err, { depth: 5, showHidden: true }) } catch (e) { return '[util.inspect failed]' } })()
     }
 
     try {
