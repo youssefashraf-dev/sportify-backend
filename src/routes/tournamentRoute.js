@@ -32,13 +32,18 @@ const { tournamentUpload } = require('../middlewares/tournamentUpload')
 // Get all tournaments
 router.route('/')
     .get(getAllTournaments)
-    .post(
-        verifyToken,
-        allowedTo('admin'),
-        tournamentUpload.single('tournamentImage'),
-        createTournamentValidator,
-        createTournament
-    )
+   .post(
+    verifyToken,
+    allowedTo('admin'),
+    tournamentUpload.single('tournamentImage'),
+    (req, res, next) => {
+        console.log('TOURNAMENT BODY:', req.body)
+        console.log('TOURNAMENT FILE:', req.file)
+        next()
+    },
+    createTournamentValidator,
+    createTournament
+)
 
 
 // ==================== Tournament Requests ====================
