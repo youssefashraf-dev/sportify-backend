@@ -12,6 +12,15 @@ const compression = require('compression')
 const qs = require('qs')
 
 
+console.log('BOOT VERSION: tournament-debug-1')
+app.use((req, res, next) => {
+  console.log('REQ:', req.method, req.originalUrl)
+  console.log('CT:', req.headers['content-type'])
+  console.log('CL:', req.headers['content-length'])
+  next()
+})
+
+
 
 
 // middlewares
