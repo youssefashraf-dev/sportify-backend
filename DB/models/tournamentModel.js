@@ -35,7 +35,11 @@ const tournamentSchema = new mongoose.Schema({
         required: [true, 'Tournament price is required'],
         min: [0, 'Tournament price cannot be negative']
     },
-
+matchType: {
+    type: String,
+    enum: ['1 VS 1', '2 VS 2', '5 VS 5', '7 VS 7'],
+    required: [true, 'Tournament match type is required']
+},
     instructions: {
         type: String,
         required: [true, 'Tournament instructions are required'],
