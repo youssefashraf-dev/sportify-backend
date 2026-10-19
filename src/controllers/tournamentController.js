@@ -43,7 +43,6 @@ const createTournament = asyncHandler(async (req, res) => {
 
     const tournament = await tournamentModel.create(tournamentData)
 
-    console.log('CREATED TOURNAMENT:', tournament.toObject())
 
     tournament
         ? res.status(201).json({

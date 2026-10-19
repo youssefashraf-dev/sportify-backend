@@ -37,8 +37,7 @@ router.route('/')
     allowedTo('admin'),
     tournamentUpload.single('tournamentImage'),
     (req, res, next) => {
-        console.log('TOURNAMENT BODY:', req.body)
-        console.log('TOURNAMENT FILE:', req.file)
+      
         next()
     },
     createTournamentValidator,

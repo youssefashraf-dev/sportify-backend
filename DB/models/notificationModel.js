@@ -9,17 +9,22 @@ const notificationSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: [
-            'BOOKING_REQUESTED',
-            'RECEIPT_UPLOADED',
-            'BOOKING_CONFIRMED',
-            'BOOKING_CANCELLED',
-            'BOOKING_REJECTED',
-            'MATCH_APPLIED',
-            'MATCH_ACCEPTED',
-            'MATCH_REJECTED',
-            'MATCH_CANCELLED'
-        ],
+       
+enum: [
+    'BOOKING_REQUESTED',
+    'RECEIPT_UPLOADED',
+    'BOOKING_CONFIRMED',
+    'BOOKING_CANCELLED',
+    'BOOKING_REJECTED',
+    'MATCH_APPLIED',
+    'MATCH_ACCEPTED',
+    'MATCH_REJECTED',
+    'MATCH_CANCELLED',
+    'TOURNAMENT_REQUEST',
+    'TOURNAMENT_REQUEST_STATUS'
+],
+
+
         required: true
     },
     title: {

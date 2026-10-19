@@ -52,7 +52,7 @@ const createTournamentRequest = asyncHandler(async (req, res) => {
     await NotificationService.sendToAllAdmins({
         type: 'TOURNAMENT_REQUEST',
         title: 'New Tournament Registration',
-        body: `A user has submitted a tournament registration request`,
+        body: 'A user has submitted a tournament registration request',
         data: {
             requestId: request._id.toString(),
             tournamentId: id,
@@ -100,7 +100,9 @@ const updateTournamentRequestStatus = asyncHandler(async (req, res) => {
     const { requestId } = req.params
     const { status } = req.body
 
-    const request = await tournamentRequestModel.findById(requestId)
+    const request = await tournamentRequestModel
+        .findById(requestId)
+        .populate('tournament', 'title')
 
     if (!request) {
         return res.status(404).json({
@@ -125,6 +127,28 @@ const updateTournamentRequestStatus = asyncHandler(async (req, res) => {
 
     request.status = status
     await request.save()
+
+    const tournamentTitle =
+        request.tournament?.title || 'Tournament'
+
+    const isAccepted = status === 'accepted'
+
+    await NotificationService.send({
+        userId: request.user,
+        type: 'TOURNAMENT_REQUEST_STATUS',
+        title: isAccepted
+            ? 'Tournament Registration Accepted'
+            : 'Tournament Registration Rejected',
+        body: isAccepted
+            ? `Your registration for ${tournamentTitle} has been accepted`
+            : `Your registration for ${tournamentTitle} has been rejected`,
+        data: {
+            requestId: request._id.toString(),
+            tournamentId:
+                request.tournament?._id?.toString() || '',
+            status
+        }
+    })
 
     res.status(200).json({
         status: 'success',
