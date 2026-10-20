@@ -7,6 +7,7 @@ const reviewRoute = require('./reviewRoute')
 const matchRoute = require('./matchRoute')
 const notificationRoute = require('./notificationRoute')
 const tournamentRoute = require('./tournamentRoute')
+const promoCodeRoute = require('./promoCodeRoute')
 
 const mountRoute = (app) => {
 
@@ -19,7 +20,7 @@ const mountRoute = (app) => {
     app.use('/api/matches', matchRoute)
     app.use('/api/notifications', notificationRoute)
     app.use('/api/tournaments', tournamentRoute)
-
+    app.use('/api/promo-codes', promoCodeRoute)
 }
 
 module.exports = mountRoute
