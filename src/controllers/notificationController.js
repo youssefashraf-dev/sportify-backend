@@ -7,24 +7,39 @@ const notificationModel = require('../../DB/models/notificationModel')
 const registerToken = asyncHandler(async (req, res) => {
     const { token, platform } = req.body
 
-    if (!token) return res.status(400).json({status: 'fail',message: 'FCM token is required'})
-
-    const user = await userModel.findById(req.user.id)
-    if (!user) return res.status(404).json({status: 'fail',message: 'User not found'})
-
-    const exists = user.fcmTokens.find(t => t.token === token)
-    if (exists) {
-        exists.lastUsedAt = new Date()
-        exists.platform = platform
-    } else {
-        user.fcmTokens.push({
-            token,
-            platform,
-            lastUsedAt: new Date()
-        })
+    if (!token) return res.status(400).json({ status: 'fail', message: 'FCM token is required' })
+    if (!['android', 'ios', 'web'].includes(platform)) {
+        return res.status(400).json({ status: 'fail', message: 'Valid platform is required' })
     }
-    await user.save()
-    res.status(200).json({status: 'success',message: 'FCM token registered successfully'})
+
+    // 1) Remove this token from every OTHER user (a device belongs to one account at a time)
+    await userModel.updateMany(
+        { _id: { $ne: req.user.id }, 'fcmTokens.token': token },
+        { $pull: { fcmTokens: { token } } }
+    )
+
+    // 2) Update the token if it exists on the current user, otherwise add it
+    const updated = await userModel.updateOne(
+        { _id: req.user.id, 'fcmTokens.token': token },
+        {
+            $set: {
+                'fcmTokens.$.lastUsedAt': new Date(),
+                'fcmTokens.$.platform': platform,
+            },
+        }
+    )
+
+    if (updated.matchedCount === 0) {
+        const result = await userModel.updateOne(
+            { _id: req.user.id },
+            { $push: { fcmTokens: { token, platform, lastUsedAt: new Date() } } }
+        )
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ status: 'fail', message: 'User not found' })
+        }
+    }
+
+    res.status(200).json({ status: 'success', message: 'FCM token registered successfully' })
 })
 
 const getMyNotifications = asyncHandler(async (req, res) => {

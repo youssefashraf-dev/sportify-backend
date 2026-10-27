@@ -63,7 +63,7 @@ const createBooking = asyncHandler(async (req, res) => {
         court,
         bookingDate,
         timeSlots: { $in: timeSlots },
-        status: { $in: ['pending', 'confirmed'] }
+        status: { $in: ['pending', 'under review', 'confirmed'] }
     })
 
     if (bookedSlots.length > 0) {

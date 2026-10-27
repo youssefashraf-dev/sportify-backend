@@ -119,20 +119,30 @@ const refreshTokenHandler = asyncHandler(async(req,res)=>{
 
 })
 
-const logout = asyncHandler(async(req,res)=>{
-    // Clear refresh token from database if user is authenticated
-    if(req.user && req.user.id) {
-        const user = await userModel.findById(req.user.id)
-        if(user) {
-            user.refreshToken = null
-            await user.save()
+const logout = asyncHandler(async (req, res) => {
+    // Clear refresh token + this device's FCM token if user is authenticated
+    if (req.user && req.user.id) {
+        const { fcmToken } = req.body || {}
+
+        const update = { $set: { refreshToken: null } }
+
+        if (fcmToken) {
+            // remove only this device's token
+            update.$pull = { fcmTokens: { token: fcmToken } }
+        } else {
+            // fallback: no token sent, remove all of this user's tokens
+            update.$set.fcmTokens = []
         }
+
+        await userModel.findByIdAndUpdate(req.user.id, update)
     }
 
     // Always clear cookies even if user is not found or token is invalid
-    return res.cookie('token','',{expires:new Date(0)})
-    .cookie('refreshToken','',{expires:new Date(0)})
-    .status(200).json({status:'success',message:'Logged out successfully'})
+    return res
+        .cookie('token', '', { expires: new Date(0) })
+        .cookie('refreshToken', '', { expires: new Date(0) })
+        .status(200)
+        .json({ status: 'success', message: 'Logged out successfully' })
 })
 
 const forgotPassword = asyncHandler(async(req,res)=>{
